@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html>
+	<head>
+	<title>Tablero de ajedrez</title>
+	<meta charset="utf-8">
+	
+	<style>
+	
+	
+
+	body{
+		background: cornsilk;
+		font-family: Arial;
+		text-align: center;
+		}
+	
+	div
+	{
+	display: flex;
+	margin: 1%;
+	}
+	
+	td
+	{
+	cursor : pointer; 
+	}
+	
+	#principal
+	{
+	display: inline-flex;
+	margin: auto;
+	}
+	
+	#tablero
+	{
+	border-collapse: collapse;
+	text-align: center;
+	margin: auto;
+	border="2px
+	}
+
+	#negro
+	{
+	border-collapse: collapse;
+	text-align: center;
+	margin: auto;
+	border=2px;
+	}
+	
+	#blanco
+	{
+	border-collapse: collapse;
+	text-align: center;
+	margin: auto;
+	border=2px;
+	}
+	
+	#footer
+	{
+	display: block;
+	}	
+	
+	
+	#tablero td
+	{
+	border-width: 2px;
+	border-color: black;
+	width: 54px;
+	height: 57px;
+	font-size:40px;
+	justify-content: space-around;
+	background-color: sandybrown ;
+	}
+		
+	#tablero tr:nth-child(odd) td:nth-child(even),#tablero tr:nth-child(even) td:nth-child(odd){
+	background-color: royalblue;
+	}
+
+	#negro td
+	{
+	border-width: 2px;
+	border-color: black;
+	width: 54px;
+	height: 57px;
+	font-size:40px;
+	justify-content: space-around;
+	background-color: LightSteelBlue ;
+	}
+	
+	#negro tr:nth-child(odd) td:nth-child(even),#negro tr:nth-child(even) td:nth-child(odd){
+	background-color: LightCoral;
+	}
+
+	#blanco td
+	{
+	border-width: 2px;
+	border-color: black;
+	width: 54px;
+	height: 57px;
+	font-size:40px;
+	justify-content: space-around;
+	background-color:LightCoral;
+	}
+	#blanco tr:nth-child(odd) td:nth-child(even),#blanco tr:nth-child(even) td:nth-child(odd){
+	background-color: LightSteelBlue;
+	}
+	</style>
+	
+	<script>
+	var tab_blanco,tab_negro,casillas;
+	var contadorNegro = 0, contadorBlanco = 15;
+	var letras = ['a','b','c','d','e','f','g','h'];
+	var registro;
+	var  turno= 1, value = true;
+	
+	
+	function programarClick()
+	{
+	// recorre todos los td y le agrega el listener on click
+	casillas = document.querySelectorAll("#tablero td");
+	tab_blanco = document.querySelectorAll("#blanco td");
+	tab_negro = document.querySelectorAll("#negro td");
+	registro = document.getElementById('registro');
+	var n = 8;
+		for(var i = 0; i<casillas.length; i++)
+		{
+		casillas[i].addEventListener("click",elegir);
+		// agregar un id a cada elemento
+		var cadena = letras[i%8];
+		cadena+= n;
+		casillas[i].setAttribute("id",cadena)
+		// cambio de fila
+			if((i+1)%8 == 0)
+			{
+			n--;
+			}
+		}
+	
+		
+	}
+	
+	
+	function elegir( ev, obj )
+	{
+	// Determinar si hay una seleccion anterior
+	var seleccionado = document.querySelector( ".seleccionado" );
+
+	if( seleccionado == null )
+	{
+		// No hay una seleccion previa
+		// Cambiar la clase de la celda para mostrarla en otro color
+		if( ev.target.innerText != "" )
+		{
+			ev.target.classList.add( "seleccionado" );
+			ev.target.style.backgroundColor = "yellow";
+
+		}
+		} else
+		{
+		// Ya habia un elemento seleccionado
+			var es = color(seleccionado.innerText.charCodeAt(0));
+		
+			if(ev.target.innerText != "")
+			{
+			var otro = color(ev.target.innerText.charCodeAt(0));
+		
+			if(es == otro)
+			{
+			window.alert( "Ya hay una ficha seleccionada del mismo color");
+		
+			}else if(es ==0 && otro ==1)// comerse una ficha blanca a negra
+			{
+			var aux = tipoFicha(seleccionado.innerText.charCodeAt(0),es);
+			tab_blanco[contadorBlanco].innerText = ev.target.innerText;
+			contadorBlanco-= 1;
+			// cambiar  peon a reina
+			var reina =  cambiarPeon(this.id,es,1);
+				if(aux=='' && reina!= '')
+				{
+				ev.target.innerText = reina;
+				}else
+				{
+				ev.target.innerText = seleccionado.innerText;
+				}
+			seleccionado.innerText = "";
+			seleccionado.style.backgroundColor = "";
+			seleccionado.classList.remove("seleccionado" );
+			// mostrar en pantalla en juego algebraico 
+			if(value)
+			{
+			registro.innerText +=turno+") "+ aux +"x"+ this.id+"  ";
+			value = false;
+			}else
+			{
+			registro.innerText +="  "+ aux +"x"+ this.id+" \n";
+			turno++;
+			value = true;
+			}
+			
+			}
+			else if(es ==1 && otro ==0)// comerse una ficha negra a blanca
+			{
+			var aux = tipoFicha(seleccionado.innerText.charCodeAt(0),es);
+			tab_negro[contadorNegro].innerText = ev.target.innerText;
+			contadorNegro+= 1;
+			// cambiar  peon a reina
+			var reina =  cambiarPeon(this.id,es,1);
+				if(aux=='' && reina!= '')
+				{
+				ev.target.innerText = reina;
+				}else
+				{
+				ev.target.innerText = seleccionado.innerText;
+				}
+			seleccionado.innerText = "";
+			seleccionado.style.backgroundColor = "";
+			seleccionado.classList.remove("seleccionado" );
+			// mostrar en pantalla en juego algebraico 
+			if(value)
+			{
+			registro.innerText +=turno+") "+ aux +"x"+ this.id+"    ";
+			value = false;
+			}else
+			{
+			registro.innerText += "  "+aux +"x"+ this.id+" \n";
+			turno++;
+			value = true;
+			}
+			
+			}
+		
+			}else // moverse
+			{
+			
+			var aux = tipoFicha(seleccionado.innerText.charCodeAt(0),es);
+			// cambiar  peon a reina
+			var reina =  cambiarPeon(this.id,es,1);
+				if(aux=='' && reina!= '')
+				{
+				ev.target.innerText = reina;
+				}else
+				{
+				ev.target.innerText = seleccionado.innerText;
+				}
+			seleccionado.innerText = "";
+			seleccionado.style.backgroundColor = "";
+			seleccionado.classList.remove("seleccionado");
+			// mostrar en pantalla en juego algebraico 
+			if(value)
+			{
+			registro.innerText +=turno+") "+ aux +" "+ this.id+"    ";
+			value = false;
+			}else
+			{
+			registro.innerText += "  "+aux +"  "+ this.id+" \n";
+			turno++;
+			value = true;
+			}
+			
+		}
+		
+		
+		}
+	}
+	// 0 si es blanco 1 si es negro 
+	function color(caracter)
+	{
+		var n = parseInt(caracter);
+		if(n >= 9818 && n <= 9823)
+		{
+		return 0;
+		}else
+		return 1;
+	}
+	// conocer que tipo de ficha es 
+	function tipoFicha(caracter, color)
+	{
+		var n = parseInt(caracter);
+		var arreglo, listaCaracter;
+		
+		if(color ==1)// negro --> blanco
+		{
+		arreglo = tab_negro;
+		listaCaracter =[9812,9813,9814,9815,9816,9817];
+		}else
+		{
+		arreglo= tab_blanco;
+		listaCaracter =[9818,9819,9820,9821,9822,9823];
+		}
+		switch(n)
+		{
+		// rey
+		case listaCaracter[0]:
+		return "K";
+		break;
+		// reina
+		case listaCaracter[1]:
+		return "D";
+		break;
+		// torre
+		case listaCaracter[2]:
+		return "T";
+		break;
+		// alfil
+		case listaCaracter[3]:
+		return "A";
+		break;
+		// caballo
+		case listaCaracter[4]:
+		return "C";
+		break;
+		// peon
+		case listaCaracter[5]:
+		return "";
+		break;
+		
+		}
+		
+	}
+	// 
+	function cambiarPeon(pos, color,indice)
+	{
+	
+	var n = parseInt(pos.charAt(indice));
+		if( n ==8 && color == 1)
+		{
+		return String.fromCharCode(9813);
+		}else if( n ==1 && color == 0)
+		{
+		return String.fromCharCode(9819);
+		}
+		return '';
+	}
+
+
+	
+	</script>
+	
+	</head>
+	
+	
+	<body onload="programarClick()">
+	<h1>Tablero de ajedrez.</h1>
+	
+	<div id="principal">
+	
+	<div id="label1">
+		<table id="negro">
+		
+		<tr>
+		<td></td>
+		<td></td>
+		</tr>
+		
+		<tr>
+		<td></td>
+		<td></td>
+		</tr>
+		
+		<tr>
+		<td></td>
+		<td></td>
+		</tr>
+		
+		<tr>
+		<td></td>
+		<td></td>
+		</tr>
+		
+		<tr>
+		<td></td>
+		<td></td>
+		</tr>
+		
+		<tr>
+		<td></td>
+		<td></td>
+		</tr>
+		
+		<tr>
+		<td></td>
+		<td></td>
+		</tr>
+		
+		<tr>
+		<td></td>
+		<td></td>
+		</tr>
+		
+		</table>
+		</div>
+	
+		<div id="label2">
+		<table id="tablero"> 
+  			
+         <tr>
+			<td>&#9820;</td>
+			<td>&#9822;</td>
+			<td>&#9821;</td>
+			<td>&#9818;</td>
+			<td>&#9819;</td>
+			<td>&#9821;</td>
+			<td>&#9822;</td>
+			<td>&#9820;</td>
+		</tr>
+		
+        <tr>
+			<td>&#9823;</td>
+			<td>&#9823;</td>
+			<td>&#9823;</td>
+			<td>&#9823;</td>
+			<td>&#9823;</td>
+			<td>&#9823;</td>
+			<td>&#9823;</td>
+			<td>&#9823;</td>
+		</tr>
+
+            	<tr>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+		</tr>
+
+            	<tr>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+		</tr>
+
+         <tr>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+		</tr>
+
+
+
+         <tr>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+			<td></td>
+		</tr>
+
+
+            	<tr>
+			<td>&#9817;</td>
+			<td>&#9817;</td>
+			<td>&#9817;</td>
+			<td>&#9817;</td>
+			<td>&#9817;</td>
+			<td>&#9817;</td>
+			<td>&#9817;</td>
+			<td>&#9817;</td>
+		</tr>
+
+		<tr>
+			<td>&#9814;</td>
+			<td>&#9816;</td>
+			<td>&#9815;</td>
+			<td>&#9812;</td>
+			<td>&#9813;</td>
+			<td>&#9815;</td>
+			<td>&#9816;</td>
+			<td>&#9814;</td>
+		</tr>
+		</table>
+		</div>
+		
+		<div id="label3">
+		<table id="blanco">
+		
+		<tr>
+		<td></td>
+		<td></td>
+		</tr>
+		
+		<tr>
+		<td></td>
+		<td></td>
+		</tr>
+		
+		<tr>
+		<td></td>
+		<td></td>
+		</tr>
+		
+		<tr>
+		<td></td>
+		<td></td>
+		</tr>
+		
+		<tr>
+		<td></td>
+		<td></td>
+		</tr>
+		
+		<tr>
+		<td></td>
+		<td></td>
+		</tr>
+		
+		<tr>
+		<td></td>
+		<td></td>
+		</tr>
+		
+		<tr>
+		<td></td>
+		<td></td>
+		</tr>
+		
+		</table>
+        </div>
+		
+		</div>
+		
+		<div id= "footer">
+		<span id="registro"></span>
+		</div>
+		
+	</body>
+</html>
